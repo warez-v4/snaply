@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snaply — Free URL Shortener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --panel:#FFF9F2;
+    --text:#1C1B19;
+    --muted:#7A756C;
+    --orange-1:#F4A25E;
+    --orange-2:#E8833A;
+    --orange-3:#C8722C;
+    --border:#EFE6D8;
+    --shadow: 0 10px 30px rgba(200,114,44,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Manrope', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,.brand{font-family:'Playfair Display', serif;}
+
+  /* ---------- NAVBAR ---------- */
+  .navbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 6%;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(8px);
+    z-index:100;
+  }
+  .brand{
+    font-size:26px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand svg{width:24px;height:24px;}
+  .nav-links{
+    display:flex;
+    gap:32px;
+    list-style:none;
+  }
+  .nav-links a{
+    text-decoration:none;
+    color:var(--muted);
+    font-weight:500;
+    font-size:15px;
+    transition:color .25s ease;
+  }
+  .nav-links a:hover{color:var(--orange-3);}
+  .menu-toggle{display:none; background:none; border:none; font-size:26px; cursor:pointer; color:var(--text);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    text-align:center;
+    padding:70px 6% 20px;
+    animation:fadeUp .8s ease both;
+  }
+  .hero h1{
+    font-size:34px;
+    margin-bottom:6px;
+  }
+  .hero p{
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  /* ---------- SHORTEN CARD ---------- */
+  .card-wrap{
+    max-width:620px;
+    margin:30px auto 0;
+    padding:0 6%;
+  }
+  .shorten-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    box-shadow:var(--shadow);
+  }
+  .input-row{
+    display:flex;
+    gap:10px;
+  }
+  .input-row input{
+    flex:1;
+    padding:14px 16px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    font-size:15px;
+    font-family:'Manrope', sans-serif;
+    outline:none;
+    background:#fff;
+    transition:border .2s ease, box-shadow .2s ease;
+  }
+  .input-row input:focus{
+    border-color:var(--orange-2);
+    box-shadow:0 0 0 3px rgba(232,131,58,0.15);
+  }
+  .btn-primary{
+    position:relative;
+    overflow:hidden;
+    padding:14px 24px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg, var(--orange-3), var(--orange-2));
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:transform .2s ease;
+    white-space:nowrap;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-primary::after{
+    content:"";
+    position:absolute;
+    top:0; left:-75%;
+    width:50%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform:skewX(-20deg);
+    transition:left .6s ease;
+  }
+  .btn-primary:hover::after{left:130%;}
+
+  .note{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+    text-align:center;
+  }
+
+  /* ---------- RESULT ---------- */
+  .result-card{
+    margin-top:20px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 20px;
+    display:none;
+    animation:slideUp .45s ease both;
+  }
+  .result-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .result-url{
+    color:var(--orange-3);
+    font-weight:700;
+    font-size:16px;
+    word-break:break-all;
+    text-decoration:none;
+  }
+  .copy-btn{
+    flex-shrink:0;
+    padding:9px 16px;
+    border-radius:10px;
+    border:1px solid var(--orange-2);
+    background:#fff;
+    color:var(--orange-3);
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .copy-btn:hover{background:var(--orange-2); color:#fff;}
+  .copy-btn.copied{background:var(--orange-3); color:#fff; border-color:var(--orange-3);}
+
+  /* ---------- AD SLOT ---------- */
+  .ad-slot{
+    margin-top:14px;
+    border:1px dashed var(--border);
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    background:var(--panel);
+    display:none;
+    animation:slideUp .4s ease both;
+  }
+  .ad-slot span{
+    display:block;
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--orange-3);
+    margin-bottom:6px;
+    font-weight:700;
+  }
+
+  .clear-row{
+    text-align:center;
+    margin-top:16px;
+  }
+  .clear-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:13px;
+    cursor:pointer;
+    text-decoration:underline;
+    display:none;
+  }
+
+  .link-icon{
+    display:inline-flex;
+    transition:transform .4s ease;
+  }
+  .link-icon.joined{transform:rotate(360deg) scale(1.1);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-top:auto;
+    border-top:1px solid var(--border);
+    padding:26px 6%;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+  }
+  footer a{color:var(--orange-3); text-decoration:none;}
+
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(16px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes slideUp{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  @media (max-width:768px){
+    .nav-links{
+      position:absolute;
+      top:100%; left:0; right:0;
+      background:#fff;
+      flex-direction:column;
+      padding:20px 6%;
+      border-bottom:1px solid var(--border);
+      display:none;
+      gap:16px;
+    }
+    .nav-links.open{display:flex;}
+    .menu-toggle{display:block;}
+    .hero h1{font-size:26px;}
+    .input-row{flex-direction:column;}
+    .result-row{flex-direction:column; align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#E8833A" stroke-width="2" stroke-linecap="round">
+      <path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 6"/>
+      <path d="M14 11a5 5 0 0 0-7.07 0L5.5 12.41a5 5 0 0 0 7.07 7.07L14 18"/>
+    </svg>
+    Snaply
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <button class="menu-toggle" id="menuToggle">☰</button>
+</nav>
+
+<section class="hero" id="home">
+  <h1>Free URL Shortener</h1>
+  <p>Paste a long link, get a short one instantly.</p>
+</section>
+
+<div class="card-wrap">
+  <div class="shorten-card">
+    <div class="input-row">
+      <input type="text" id="longUrl" placeholder="Paste your long URL here">
+      <button class="btn-primary" id="shortenBtn">
+        <span class="link-icon" id="linkIcon">🔗</span> Shorten
+      </button>
+    </div>
+    <p class="note">Links expire automatically after 3 minutes.</p>
+
+    <div class="result-card" id="resultCard">
+      <div class="result-row">
+        <a href="#" target="_blank" class="result-url" id="shortUrlText"></a>
+        <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+    </div>
+
+    <div class="ad-slot" id="adSlot">
+      <span>Sponsored</span>
+      Your brand could be featured here
+    </div>
+
+    <div class="clear-row">
+      <button class="clear-btn" id="clearBtn">✕ Clear and shorten another link</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Snaply — Crafted with care. <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+</footer>
+<script>
+  const AD_REDIRECT_URL = "https://www.effectivecpmnetwork.com/m4x50kgz?key=0fa852e8ad67da93d288bbd1cba46cfc";
+
+  const menuToggle = document.getElementById("menuToggle");
+  const navLinks = document.getElementById("navLinks");
+  menuToggle.addEventListener("click", () => navLinks.classList.toggle("open"));
+
+  const longUrlInput = document.getElementById("longUrl");
+  const shortenBtn = document.getElementById("shortenBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const resultCard = document.getElementById("resultCard");
+  const shortUrlText = document.getElementById("shortUrlText");
+  const copyBtn = document.getElementById("copyBtn");
+  const linkIcon = document.getElementById("linkIcon");
+  const adSlot = document.getElementById("adSlot");
+
+  longUrlInput.addEventListener("input", () => {
+    clearBtn.style.display = longUrlInput.value ? "inline-block" : "none";
+  });
+
+  clearBtn.addEventListener("click", () => {
+    longUrlInput.value = "";
+    clearBtn.style.display = "none";
+    resultCard.style.display = "none";
+    adSlot.style.display = "none";
+    longUrlInput.focus();
+  });
+
+  shortenBtn.addEventListener("click", async () => {
+    const longUrl = longUrlInput.value.trim();
+    if (!longUrl) {
+      longUrlInput.focus();
+      return;
+    }
+
+    linkIcon.classList.add("joined");
+    setTimeout(() => linkIcon.classList.remove("joined"), 400);
+
+    try {
+      const res = await fetch("/api/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: longUrl })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        shortUrlText.textContent = data.short_url;
+        shortUrlText.href = data.short_url;
+        resultCard.style.display = "block";
+        adSlot.style.display = "none";
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("copied");
+        clearBtn.style.display = "inline-block";
+      } else {
+        alert(data.error || "Something went wrong");
+      }
+    } catch (err) {
+      alert("Could not connect to the server");
+    }
+  });
+
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(shortUrlText.textContent).then(() => {
+      copyBtn.textContent = "Copied";
+      copyBtn.classList.add("copied");
+      adSlot.style.display = "block";
+
+      window.open(AD_REDIRECT_URL, "_blank");
+
+      setTimeout(() => {
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("copied");
+      }, 1800);
+    });
+  });
+</script>
+</body>
+</html>
