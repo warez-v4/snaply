@@ -6,7 +6,6 @@ client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
 urls_collection = db["urls"]
 
-# এইখানে বসাও — একবারই রান হবে, ফাইল লোড হওয়ার সময়
 urls_collection.create_index("created_at", expireAfterSeconds=180)
 
 
@@ -35,3 +34,16 @@ def increment_clicks(short_code):
         {"short_code": short_code},
         {"$inc": {"clicks": 1}}
     )
+
+
+def get_stats(short_code):
+    """একটা লিংকের ক্লিক সংখ্যা আর তথ্য বের করবে"""
+    result = urls_collection.find_one({"short_code": short_code})
+    if result:
+        return {
+            "short_code": result["short_code"],
+            "original_url": result["original_url"],
+            "clicks": result["clicks"],
+            "created_at": result["created_at"].isoformat()
+        }
+    return None

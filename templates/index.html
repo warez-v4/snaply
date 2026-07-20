@@ -3,6 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Snaply — a free, fast, and secure URL shortener. Paste any long link and get a short, shareable URL instantly.">
+<meta name="keywords" content="url shortener, free url shortener, link shortener, short url, snaply">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph (Facebook/LinkedIn shares) -->
+<meta property="og:title" content="Snaply — Free URL Shortener">
+<meta property="og:description" content="Shorten any long URL instantly with Snaply — free, fast, and secure.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://snaply-7ae6.onrender.com">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Snaply — Free URL Shortener">
+<meta name="twitter:description" content="Shorten any long URL instantly with Snaply — free, fast, and secure.">
 <title>Snaply — Free URL Shortener</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
@@ -29,7 +43,6 @@
   }
   h1,h2,.brand{font-family:'Playfair Display', serif;}
 
-  /* ---------- NAVBAR ---------- */
   .navbar{
     display:flex;
     align-items:center;
@@ -65,7 +78,6 @@
   .nav-links a:hover{color:var(--orange-3);}
   .menu-toggle{display:none; background:none; border:none; font-size:26px; cursor:pointer; color:var(--text);}
 
-  /* ---------- HERO ---------- */
   .hero{
     text-align:center;
     padding:70px 6% 20px;
@@ -80,7 +92,6 @@
     font-size:14px;
   }
 
-  /* ---------- SHORTEN CARD ---------- */
   .card-wrap{
     max-width:620px;
     margin:30px auto 0;
@@ -109,6 +120,24 @@
     transition:border .2s ease, box-shadow .2s ease;
   }
   .input-row input:focus{
+    border-color:var(--orange-2);
+    box-shadow:0 0 0 3px rgba(232,131,58,0.15);
+  }
+  .alias-row{
+    margin-top:10px;
+  }
+  .alias-row input{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    font-size:13px;
+    font-family:'Manrope', sans-serif;
+    outline:none;
+    background:#fff;
+    transition:border .2s ease, box-shadow .2s ease;
+  }
+  .alias-row input:focus{
     border-color:var(--orange-2);
     box-shadow:0 0 0 3px rgba(232,131,58,0.15);
   }
@@ -145,7 +174,14 @@
     text-align:center;
   }
 
-  /* ---------- RESULT ---------- */
+  .error-msg{
+    font-size:12px;
+    color:#C0392B;
+    margin-top:8px;
+    text-align:center;
+    display:none;
+  }
+
   .result-card{
     margin-top:20px;
     background:#fff;
@@ -183,7 +219,23 @@
   .copy-btn:hover{background:var(--orange-2); color:#fff;}
   .copy-btn.copied{background:var(--orange-3); color:#fff; border-color:var(--orange-3);}
 
-  /* ---------- AD SLOT ---------- */
+  .stats-box{
+    margin-top:12px;
+    font-size:13px;
+    color:var(--muted);
+    display:none;
+    align-items:center;
+    gap:8px;
+  }
+  .stats-box .refresh-btn{
+    background:none;
+    border:none;
+    color:var(--orange-3);
+    cursor:pointer;
+    font-size:12px;
+    text-decoration:underline;
+  }
+
   .ad-slot{
     margin-top:14px;
     border:1px dashed var(--border);
@@ -226,7 +278,6 @@
   }
   .link-icon.joined{transform:rotate(360deg) scale(1.1);}
 
-  /* ---------- FOOTER ---------- */
   footer{
     margin-top:auto;
     border-top:1px solid var(--border);
@@ -300,12 +351,22 @@
         <span class="link-icon" id="linkIcon">🔗</span> Shorten
       </button>
     </div>
+
+    <div class="alias-row">
+      <input type="text" id="customAlias" placeholder="Custom alias (optional) — e.g. my-link">
+    </div>
+
     <p class="note">Links expire automatically after 3 minutes.</p>
+    <p class="error-msg" id="errorMsg"></p>
 
     <div class="result-card" id="resultCard">
       <div class="result-row">
         <a href="#" target="_blank" class="result-url" id="shortUrlText"></a>
         <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+      <div class="stats-box" id="statsBox">
+        👁️ <span id="clickCount">0</span> clicks
+        <button class="refresh-btn" id="refreshStatsBtn">Refresh</button>
       </div>
     </div>
 
@@ -323,14 +384,16 @@
 <footer>
   <p>© 2026 Snaply — Crafted with care. <a href="#">Privacy</a> · <a href="#">Terms</a></p>
 </footer>
+
 <script>
-  const AD_REDIRECT_URL = "https://www.effectivecpmnetwork.com/m4x50kgz?key=0fa852e8ad67da93d288bbd1cba46cfc";
+  const AD_REDIRECT_URL = "https://your-ad-network-link.com";
 
   const menuToggle = document.getElementById("menuToggle");
   const navLinks = document.getElementById("navLinks");
   menuToggle.addEventListener("click", () => navLinks.classList.toggle("open"));
 
   const longUrlInput = document.getElementById("longUrl");
+  const customAliasInput = document.getElementById("customAlias");
   const shortenBtn = document.getElementById("shortenBtn");
   const clearBtn = document.getElementById("clearBtn");
   const resultCard = document.getElementById("resultCard");
@@ -338,6 +401,12 @@
   const copyBtn = document.getElementById("copyBtn");
   const linkIcon = document.getElementById("linkIcon");
   const adSlot = document.getElementById("adSlot");
+  const errorMsg = document.getElementById("errorMsg");
+  const statsBox = document.getElementById("statsBox");
+  const clickCount = document.getElementById("clickCount");
+  const refreshStatsBtn = document.getElementById("refreshStatsBtn");
+
+  let currentShortCode = null;
 
   longUrlInput.addEventListener("input", () => {
     clearBtn.style.display = longUrlInput.value ? "inline-block" : "none";
@@ -345,14 +414,21 @@
 
   clearBtn.addEventListener("click", () => {
     longUrlInput.value = "";
+    customAliasInput.value = "";
     clearBtn.style.display = "none";
     resultCard.style.display = "none";
     adSlot.style.display = "none";
+    statsBox.style.display = "none";
+    errorMsg.style.display = "none";
+    currentShortCode = null;
     longUrlInput.focus();
   });
 
   shortenBtn.addEventListener("click", async () => {
     const longUrl = longUrlInput.value.trim();
+    const customAlias = customAliasInput.value.trim();
+    errorMsg.style.display = "none";
+
     if (!longUrl) {
       longUrlInput.focus();
       return;
@@ -365,7 +441,7 @@
       const res = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: longUrl })
+        body: JSON.stringify({ url: longUrl, custom_alias: customAlias })
       });
       const data = await res.json();
 
@@ -377,11 +453,17 @@
         copyBtn.textContent = "Copy";
         copyBtn.classList.remove("copied");
         clearBtn.style.display = "inline-block";
+
+        currentShortCode = data.short_code;
+        statsBox.style.display = "flex";
+        loadStats();
       } else {
-        alert(data.error || "Something went wrong");
+        errorMsg.textContent = data.error || "Something went wrong";
+        errorMsg.style.display = "block";
       }
     } catch (err) {
-      alert("Could not connect to the server");
+      errorMsg.textContent = "Could not connect to the server";
+      errorMsg.style.display = "block";
     }
   });
 
@@ -399,6 +481,22 @@
       }, 1800);
     });
   });
+
+  async function loadStats() {
+    if (!currentShortCode) return;
+    try {
+      const res = await fetch(`/api/stats/${currentShortCode}`);
+      const data = await res.json();
+      if (res.ok) {
+        clickCount.textContent = data.clicks;
+      }
+    } catch (err) {
+      console.error("Stats load failed");
+    }
+  }
+
+  refreshStatsBtn.addEventListener("click", loadStats);
 </script>
+
 </body>
 </html>
